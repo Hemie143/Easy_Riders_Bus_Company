@@ -1,0 +1,9 @@
+course*.yaml
+lesson-info.yaml
+task*.yaml
+task*.html
+/venv/
+/.idea/
+test_helper.py
+tests.py
+hstest/
