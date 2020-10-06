@@ -1,5 +1,5 @@
 import json
-# 5 min
+# 15 min
 
 data = json.loads(input())
 
