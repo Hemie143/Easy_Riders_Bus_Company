@@ -6,13 +6,13 @@ data = json.loads(input())
 
 # Fields with attributes: type, required, format(regex)
 fields = {
-    'bus_id': [int, True, None],
-    'stop_id': [int, True, None],
-    # 'stop_name': [str, True, '^[A-Z].*(?:Avenue|Street|Boulevard|Road|Str.|St.|Av.|street)$'],
-    'stop_name': [str, True, None],
-    'next_stop': [int, True, None],
+    # 'bus_id': [int, True, None],
+    # 'stop_id': [int, True, None],
+    'stop_name': [str, True, '^[A-Z].*(?:Avenue|Street|Boulevard|Road)$'],
+    # 'next_stop': [int, True, None],
     'stop_type': [str, False, '^[SOF]$'],
-    'a_time': [str, True, r'([01]?[0-9]|2[0-3]):[0-5][0-9]'],
+    'a_time': [str, True, r'([01][0-9]|2[0-3]):[0-5][0-9]$'],
+    # 'a_time': [str, True, r'([01]?[0-9]|2[0-3]):[0-5][0-9]'],
 }
 
 errors_total = 0
@@ -31,7 +31,6 @@ for entry in data:
             errors[field_name] += 1
         elif field_value and field_format and re.match(field_format, field_value) is None:
             errors[field_name] += 1
-            print(field_value)
     errors_total = sum(errors.values())
 
 print(f'Type and required field validation: {errors_total} errors')
