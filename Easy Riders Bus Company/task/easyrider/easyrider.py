@@ -129,6 +129,7 @@ def check_time(data):
                 print(f'bus_id line {line}: wrong time on station {bus_stop["stop_name"]}')
                 all_times_ok = False
                 break
+            stop_time = this_time
     if all_times_ok:
         print('OK')
     return
