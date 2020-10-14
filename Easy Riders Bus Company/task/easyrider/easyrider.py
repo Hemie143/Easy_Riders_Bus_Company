@@ -112,10 +112,29 @@ def get_bus_stop(data, bus_id, stop_type=None, stop_id=None):
                 return entry
     return None
 
+
+def get_bus_start(data, bus_id):
+    # Not sure whether the start is the entry with the S stop_type or the one with the lowest stop_id
+    line_stops_ids = [e['stop_id'] for e in data if e['bus_id'] == bus_id]
+    start_id = min(line_stops_ids)
+    return get_bus_stop(data, bus_id, stop_id=start_id)
+
+
+def get_bus_finish(data, bus_id):
+    line_stops_ids = [e['stop_id'] for e in data if e['bus_id'] == bus_id]
+    finish_id = max(line_stops_ids)
+    return get_bus_stop(data, bus_id, stop_id=finish_id)
+
+
+def get_bus_transfers(data, bus_id):
+    line_stops_ids = [e['stop_id'] for e in data if e['bus_id'] == bus_id]
+    transfers = [e for e in data if e['bus_id'] != bus_id and e['stop_id'] in line_stops_ids]
+    return transfers
+
+
 def check_time(data):
     bus_lines = list(set([e['bus_id'] for e in data]))
     bus_lines.sort()
-    # print(bus_lines)
     all_times_ok = True
     for line in bus_lines:
         bus_stop = get_bus_stop(data, line, stop_type="S")
@@ -134,29 +153,30 @@ def check_time(data):
         print('OK')
     return
 
-    '''
-    bus_time = datetime.strptime('00:00', '%H:%M')
-    current_line = None
-    skip_line = None
-    time_errors = False
-    print('Arrival time test:')
-    for entry in data:
-        bus_id = entry['bus_id']
-        if bus_id == skip_line:
-            continue
-        if bus_id != current_line:
-            bus_time = datetime.strptime('00:00', '%H:%M')
-            current_line = bus_id
-        if datetime.strptime(entry['a_time'], '%H:%M') > bus_time or entry['stop_type'] == 'F':
-            bus_time = datetime.strptime(entry['a_time'], '%H:%M')
-        else:
-            print(f'bus_id line {bus_id}: wrong time on station {entry["stop_name"]}')
-            skip_line = bus_id
-            time_errors = True
-    if not time_errors:
+
+def check_on_demand(data):
+    bus_lines = list(set([e['bus_id'] for e in data]))
+    bus_lines.sort()
+    wrong_stops = set()
+    print('On demand stops test:')
+    for line in bus_lines:
+        stops = []
+        stops.append(get_bus_start(data, line))
+        stops.append(get_bus_finish(data, line))
+        stops.extend(get_bus_transfers(data, line))
+        wrong_stops.update([s['stop_name'] for s in stops if s['stop_type'] == 'O'])
+    if len(wrong_stops):
+        print(f'Wrong stop type: {sorted(wrong_stops)}')
+    else:
         print('OK')
-    '''
+
 
 # find_lines(data)
 # find_stops(data)
-check_time(data)
+# check_time(data)
+check_on_demand(data)
+
+'''
+Test1
+[{"bus_id" : 128, "stop_id" : 1, "stop_name" : "Prospekt Avenue", "next_stop" : 3, "stop_type" : "S", "a_time" : "08:12"}, {"bus_id" : 128, "stop_id" : 3, "stop_name" : "Elm Street", "next_stop" : 5, "stop_type" : "", "a_time" : "08:19"}, {"bus_id" : 128, "stop_id" : 5, "stop_name" : "Fifth Avenue", "next_stop" : 7, "stop_type" : "O", "a_time" : "08:25"}, {"bus_id" : 128, "stop_id" : 7, "stop_name" : "Sesame Street", "next_stop" : 0, "stop_type" : "F", "a_time" : "08:37"}, {"bus_id" : 256, "stop_id" : 2, "stop_name" : "Pilotow Street", "next_stop" : 3, "stop_type" : "S", "a_time" : "09:20"}, {"bus_id" : 256, "stop_id" : 3, "stop_name" : "Elm Street", "next_stop" : 6, "stop_type" : "", "a_time" : "09:45"}, {"bus_id" : 256, "stop_id" : 6, "stop_name" : "Sunset Boulevard", "next_stop" : 7, "stop_type" : "", "a_time" : "09:59"}, {"bus_id" : 256, "stop_id" : 7, "stop_name" : "Sesame Street", "next_stop" : 0, "stop_type" : "F", "a_time" : "10:12"}, {"bus_id" : 512, "stop_id" : 4, "stop_name" : "Bourbon Street", "next_stop" : 6, "stop_type" : "S", "a_time" : "08:13"}, {"bus_id" : 512, "stop_id" : 6, "stop_name" : "Sunset Boulevard", "next_stop" : 0, "stop_type" : "F", "a_time" : "08:16"}]
+'''
